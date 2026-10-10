@@ -40,16 +40,6 @@ flowchart LR
 
 The app reads each player's retirement status from the database through the Express API, then selects the source for athlete details. Retired players are served from the database; active players are looked up by the PHP scraping service, which extracts selected fields from Wikipedia and returns JSON to the frontend.
 
-## Screenshots
-
-Screenshots can be added under `docs/screenshots/`.
-
-Suggested captures:
-
-- Home page with player search.
-- Player details page.
-- Player comparison page with chart output.
-
 ## Installation / Getting Started
 
 ### Prerequisites
@@ -142,8 +132,6 @@ StarStats/
 |   `-- StarStats-SCRAPING/         # PHP scraping endpoints
 |-- database/
 |   `-- schema.sql                  # MySQL/MariaDB schema and demo data
-|-- docs/
-|   `-- screenshots/                # Place UI screenshots here
 `-- .github/                        # CI and contribution templates
 ```
 
@@ -162,7 +150,7 @@ StarStats/
 - Replace the PHP scraping endpoints with a typed backend integration service.
 - Add authentication flows for the favorite-player dashboard.
 - Improve code splitting in the frontend bundle.
-- Add screenshots and a hosted demo once deployment is configured.
+- Add a hosted demo once deployment is configured.
 
 ## Author
 
