@@ -4,12 +4,13 @@ StarStats is a full-stack tennis statistics platform for searching players, view
 
 ## Overview
 
-The project combines a React web interface, an Express API, a MySQL/MariaDB database, and a small PHP scraping service used to enrich active-player data from Wikipedia. It was built as an academic final project and prepared as a portfolio repository focused on full-stack development, data modeling, API integration, and interactive data visualization.
+The project combines a React web interface, an Express API, a MySQL/MariaDB database, and a small PHP scraping service. StarStats selects the data source according to each athlete's retirement status: retired athletes' information comes from the database, while active athletes' information is obtained from Wikipedia through scraping. It was built as an academic final project and prepared as a portfolio repository focused on full-stack development, data modeling, API integration, and interactive data visualization.
 
 ## Main Features
 
 - Search tennis players from the landing page.
 - View player cards with personal details, country flags, sport icons, retirement status, and title counts.
+- Select the athlete data source based on retirement status: database records for retired players and Wikipedia scraping for active players.
 - Compare selected players by titles or matches for a chosen competition.
 - Display comparison results in a pie chart using Recharts.
 - Serve structured player and competition data through an Express API.
@@ -30,12 +31,14 @@ The project combines a React web interface, an Express API, a MySQL/MariaDB data
 flowchart LR
     User[User] --> Web[React + Vite web app]
     Web --> API[Express + TypeScript API]
-    Web --> Scraper[PHP scraping endpoints]
+    Web --> Decision{Retired?}
+    Decision -->|Yes| API
+    Decision -->|No| Scraper[PHP scraping endpoints]
     API --> DB[(MySQL / MariaDB)]
     Scraper --> Wiki[Wikipedia pages]
 ```
 
-The web app calls the Express API for database-backed player and competition data. For active players, it also calls the PHP service, which extracts selected fields from Wikipedia pages and returns JSON to the frontend.
+The app reads each player's retirement status from the database through the Express API, then selects the source for athlete details. Retired players are served from the database; active players are looked up by the PHP scraping service, which extracts selected fields from Wikipedia and returns JSON to the frontend.
 
 ## Screenshots
 
@@ -59,7 +62,7 @@ Suggested captures:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/Ivan-Baltanas/StarStats.git
+git clone https://github.com/theblondcoder/StarStats.git
 cd StarStats
 ```
 
