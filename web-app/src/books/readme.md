@@ -1,0 +1,1 @@
+En esta carpeta iran varias subcarpetas con todas las plantillas reutilizables, como por ejemplo formularios comunes que puedan utilizarse en varias páginas aunque la página no tenga relación. Cada uno de los ficheros pertenecerá a una subcarpeta.

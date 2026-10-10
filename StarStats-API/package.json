@@ -1,0 +1,31 @@
+{
+  "name": "starstats-api",
+  "version": "1.0.0",
+  "description": "Express and TypeScript API for the StarStats tennis statistics platform.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "tsc": "tsc",
+    "test": "echo \"No automated tests configured\""
+  },
+  "author": "Ivan Baltanas Ortiz",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/express-session": "^1.18.0",
+    "dotenv": "^16.4.5",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "5.4.5"
+  },
+  "dependencies": {
+    "@types/puppeteer": "^7.0.4",
+    "axios": "^1.7.2",
+    "cors": "^2.8.5",
+    "express": "4.19.2",
+    "express-session": "^1.18.0",
+    "mysql2": "^3.9.7"
+  }
+}

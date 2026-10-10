@@ -1,0 +1,13 @@
+export const H_BTN_NAVBAR= '1.9375rem';
+export const W_BTN_NAVBAR= '8.1875 rem';
+export const W_BTN_NAVBAR_REST= '40rem';
+export const POP_UP_SEARCH_BAR= '34rem';
+export const H_CARD= '22rem';
+export const W_CARD= '14.5rem';
+export const BTN_CARD= '0.1rem';
+export const W_CONTAINER_CARDS= '57rem';
+export const H_CONTAINER_CARDS= '51rem';
+export const LETTERS_CARDS= '0.5rem';
+export const W_PIECHART= '30rem';
+export const H_PIECHART= '30rem';
+export const W_HISTOGRAM= '25rem';
