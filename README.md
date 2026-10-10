@@ -1,29 +1,49 @@
-# StarStats
-
-StarStats is a full-stack tennis statistics platform for searching players, viewing detailed athlete cards, and comparing performance across competitions.
+<div align="center">
+  <img src="web-app/public/images/logo-web.png" alt="StarStats logo" width="124" />
+  <h1>StarStats</h1>
+  <p><strong>Tennis statistics, player insights, and cross-competition comparisons.</strong></p>
+  <p>A full-stack platform built with React, Express, TypeScript, PHP, and MySQL.</p>
+  <p>
+    <img alt="React 18" src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=20232A" />
+    <img alt="Vite 5" src="https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
+    <img alt="TypeScript 5" src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+    <img alt="Express 4" src="https://img.shields.io/badge/Express-4-000000?style=for-the-badge&logo=express&logoColor=white" />
+    <img alt="MySQL and MariaDB" src="https://img.shields.io/badge/MySQL-MariaDB-4479A1?style=for-the-badge&logo=mysql&logoColor=white" />
+    <img alt="PHP 8" src="https://img.shields.io/badge/PHP-8-777BB4?style=for-the-badge&logo=php&logoColor=white" />
+    <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" />
+  </p>
+  <p>
+    <a href="#features">Features</a> ·
+    <a href="#architecture">Architecture</a> ·
+    <a href="#installation--getting-started">Getting started</a> ·
+    <a href="#environment-variables">Configuration</a>
+  </p>
+</div>
 
 ## Overview
 
-The project combines a React web interface, an Express API, a MySQL/MariaDB database, and a small PHP scraping service. StarStats selects the data source according to each athlete's retirement status: retired athletes' information comes from the database, while active athletes' information is obtained from Wikipedia through scraping. It was built as an academic final project and prepared as a portfolio repository focused on full-stack development, data modeling, API integration, and interactive data visualization.
+StarStats brings player search, detailed athlete cards, and competition comparisons into one tennis statistics app. Its source-aware data flow serves retired athletes from MySQL/MariaDB and enriches active-player information with data scraped from Wikipedia.
 
-## Main Features
+## Features
 
 - Search tennis players from the landing page.
 - View player cards with personal details, country flags, sport icons, retirement status, and title counts.
-- Select the athlete data source based on retirement status: database records for retired players and Wikipedia scraping for active players.
+- Choose the athlete data source based on retirement status: database records for retired players and Wikipedia scraping for active players.
 - Compare selected players by titles or matches for a chosen competition.
 - Display comparison results in a pie chart using Recharts.
 - Serve structured player and competition data through an Express API.
 - Enrich active-player cards and competition stats through PHP scraping endpoints.
 - Load the database from a versioned SQL schema with demo data.
 
-## Tech Stack
+## Technology Stack
 
-- **Frontend:** React 18, Vite, NextUI, Tailwind CSS, React Router, Recharts, Axios
-- **Backend:** Node.js, Express, TypeScript, mysql2, express-session
-- **Scraping service:** PHP, DOMDocument, XPath
-- **Database:** MySQL or MariaDB
-- **Tooling:** ESLint, TypeScript compiler, GitHub Actions
+| Layer | Technologies |
+| --- | --- |
+| Frontend | React 18, Vite, NextUI, Tailwind CSS, React Router, Recharts, Axios |
+| API | Node.js, Express 4, TypeScript, mysql2, express-session |
+| Data enrichment | PHP, DOMDocument, XPath, Wikipedia |
+| Database | MySQL or MariaDB |
+| Quality checks | ESLint, TypeScript compiler, GitHub Actions |
 
 ## Architecture
 
