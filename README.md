@@ -1,5 +1,8 @@
+<p align="center">
+  <img src="docs/starstats-tech-banner.png" alt="StarStats tennis analytics banner" width="100%" />
+</p>
+
 <div align="center">
-  <img src="web-app/public/images/logo-web.png" alt="StarStats logo" width="124" />
   <h1>StarStats</h1>
   <p><strong>Tennis statistics, player insights, and cross-competition comparisons.</strong></p>
   <p>A full-stack platform built with React, Express, TypeScript, PHP, and MySQL.</p>
