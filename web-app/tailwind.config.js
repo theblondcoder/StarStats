@@ -2,7 +2,6 @@
 import { nextui } from "@nextui-org/react";
 import * as COLORS from './src/consts/colors'
 import * as SIZES from './src/consts/sizes'
-import gradients from 'tailwindcss-gradients';
 
 export default {
   content: [
@@ -71,7 +70,6 @@ export default {
   darkMode: "class",
   plugins: [
     nextui(),
-    gradients,
   ],
 }
 

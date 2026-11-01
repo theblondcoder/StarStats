@@ -1,0 +1,11 @@
+{
+  "name": "starstats-local",
+  "private": true,
+  "engines": { "node": ">=22.14.0" },
+  "scripts": {
+    "setup": "node scripts/setup.mjs && npm --prefix StarStats-API ci && npm --prefix web-app ci",
+    "db:init": "node scripts/init-db.mjs",
+    "dev": "node scripts/dev.mjs",
+    "check": "npm --prefix StarStats-API run build && npm --prefix web-app run lint && npm --prefix web-app run build"
+  }
+}

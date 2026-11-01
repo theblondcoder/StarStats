@@ -32,7 +32,8 @@ function Comparacion({datCompPlayer}){
             <text
                 x={x}
                 y={y}
-                fill="white"
+                fill="#162017"
+                fontWeight={600}
                 textAnchor={x > cx ? "start" : "end"}
                 dominantBaseline="central"
             >
@@ -42,15 +43,22 @@ function Comparacion({datCompPlayer}){
         };
 return(
 
-    <div className='w-pie-chart h-pie-chart'>
+    <div className='comparison-chart'>
+        {datosComp.every(item => item.conteo === 0) ? (
+            <p className="text-white">No hay resultados registrados para esta selección.</p>
+        ) : (
         <ResponsiveContainer >
             <PieChart>
                 <Pie 
                     dataKey="conteo"
                     data={datosComp}
                     fill="#8884d8"
-                    cx={200}
-                    cy={200}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius="52%"
+                    outerRadius="82%"
+                    paddingAngle={3}
+                    stroke="none"
                     labelLine={false}
                     label={renderCustomizedLabel}
                 >
@@ -62,6 +70,7 @@ return(
                 </Pie>
             </PieChart>
         </ResponsiveContainer>
+        )}
 
     </div>
 )

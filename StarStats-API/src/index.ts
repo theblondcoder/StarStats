@@ -29,8 +29,13 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.get('/ping', async(_, res) => {
-    const[result]=await pool.query("SELECT * FROM TODOS_DEPORTISTAS")
-    res.json(result)
+    try {
+        const [result] = await pool.query('SELECT * FROM todos_deportistas');
+        res.json(result);
+    } catch (error) {
+        console.error('Database connection failed:', error);
+        res.status(503).json({ message: 'No se puede acceder a la base de datos. Revisa StarStats-API/.env e importa database/schema.sql.' });
+    }
 })
 
 
@@ -42,4 +47,5 @@ app.use('/API-StarStats/titulos-jugador', TitulosJugadorRouter);
 
 
 app.listen(PORT, () =>{
+    console.log(`StarStats API: http://localhost:${PORT}`);
 })

@@ -1,73 +1,43 @@
 <?php
-$allowedOrigin = getenv("CLIENT_ORIGIN") ?: "http://localhost:5173";
-header("Access-Control-Allow-Origin: ".$allowedOrigin);
-header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+require_once __DIR__.'/wikipedia.php';
+prepararRespuesta();
 
-if(isset($_GET['deportista'])){
+$deportista = $_GET['deportista'] ?? null;
+$competicion = $_GET['competicion'] ?? null;
+$modalidad = $_GET['modalidad'] ?? null;
+if (!is_string($deportista) || trim($deportista) === '' || !is_string($competicion) || trim($competicion) === '' || !in_array($modalidad, ['partidos', 'titulos'], true)) {
+    errorJson(400, 'Indica un deportista, una competición y una modalidad válida.');
+}
 
-    $deportista= $_GET['deportista'];
-    $modalidad= $_GET['modalidad'];
-    $competicion=$_GET['competicion'];
-    $url = "https://es.wikipedia.org/wiki/".$deportista;
-
-    $html = file_get_contents($url);
-
-    if ($html !== false) {
-        $doc = new DOMDocument;
-        libxml_use_internal_errors(true);
-        $doc->loadHTML($html);
-        libxml_clear_errors();
-    
-        $xpath = new DOMXPath($doc);
-        
-        $resultados = [];
-
-
-        if($modalidad=="partidos"){
-            $queries = [
-                "PARTIDOS" => "//table[contains(@class, 'wikitable') and contains(@style, 'text-align:center;')]//tr[td[1]//a[@title='".$competicion."'] and td[1]//span[@class='flagicon']]/td[last()-1]/text()",
-                "SECOND" => "//table[contains(@class, 'wikitable') and contains(@style, 'text-align:center;')]//tr[td[1]//a[@title='".$competicion."'] and td[1]//span[@class='flagicon']]/th[last()]/text()",
-                "TERCERO" => "//table[contains(@class, 'wikitable') and contains(@style, 'text-align:center;')]//tr[td[1]//a[@title='".$competicion."'] and td[1]//span[@class='flagicon']]/td[last()]/text()"
-            ];
-        $resultados = [
-                'id_deportista' => $_GET['deportista']
-            ];
-            
-            foreach ($queries as $titulo => $query) {
-                $elements = $xpath->query($query);
-                $temporal=[];
-                foreach ($elements as $element) {
-                    $partes = explode('-', $element->nodeValue);
-                    $textos = trim($partes[0]);
-                }
-                $temporal[$titulo] = $textos;
-                foreach ($temporal as $clave => $valor) {
-                    if (!is_numeric($valor)) {
-                        unset($temporal[$clave]);
-                    }else{
-                        $resultados['conteo']= $temporal[$clave];
-                    }
-                }
-                
-            }       
-        }else if($modalidad=="titulos"){
-            $queries = [
-                "TITULOS"=> '//tr/td/a[contains(@title, "Anexo:'.$competicion.'") and text()="G"] | //tr/td/a[contains(@title, "Anexo:'.$competicion.'")]/b[text()="G"]',
-            ];
-            foreach ($queries as $titulo => $query) {
-                $elements = $xpath->query($query);
-                $conteo = $elements->length;
-                $resultados[$titulo] = $conteo;
-            }
-    
-            $resultados = array_merge(['id_deportista' => $_GET['deportista']] , ['conteo' => $conteo]);
-    
-        
-        }else{
-           echo "NINGUNA OPCION";
+try {
+    $xpath = cargarWikipedia($deportista);
+    $competicion = trim($competicion);
+    if ($modalidad === 'titulos') {
+        $enlaces = $xpath->query('//table[contains(@class,"wikitable")]//td//a[contains(@title,'.literalXPath('Anexo:'.$competicion).') and normalize-space(.)="G"]');
+        $conteo = $enlaces->length;
+        if (!$conteo && !$xpath->query('//a[@title='.literalXPath($competicion).']')->length) {
+            errorJson(502, 'No se encontró la competición en Wikipedia.');
         }
-        echo json_encode($resultados);
+    } else {
+        // No depende de atributos style ni de iconos de bandera que pueden cambiar.
+        $filas = $xpath->query('//table[contains(@class,"wikitable")]//tr[td[1]//a[@title='.literalXPath($competicion).']]');
+        $conteo = null;
+        foreach ($filas as $fila) {
+            $celdas = $xpath->query('./td | ./th', $fila);
+            foreach (array_reverse(iterator_to_array($celdas)) as $celda) {
+                $texto = textoCelda($xpath, $celda);
+                if (preg_match('/^(\d+)\s*[–−-]\s*\d+(?:\s|$)/u', $texto, $partidos)) {
+                    $conteo = (int)$partidos[1];
+                    break 2;
+                }
+            }
+        }
+        if ($conteo === null) {
+            errorJson(502, 'Wikipedia no incluye un total de partidos reconocible para esta competición.');
+        }
     }
+    echo json_encode(['id_deportista' => $deportista, 'conteo' => $conteo], JSON_UNESCAPED_UNICODE);
+} catch (Throwable $error) {
+    error_log($error->getMessage());
+    errorJson(502, 'No se pudo consultar Wikipedia. Vuelve a intentarlo más tarde.');
 }

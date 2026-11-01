@@ -1,5 +1,5 @@
 import Axios from 'axios';
-const api_url = import.meta.env.REACT_APP_API_URL;
+const api_url = import.meta.env.REACT_APP_API_URL || '/API-StarStats';
 
 
 export async function searchBarPlayer(){
@@ -8,6 +8,7 @@ export async function searchBarPlayer(){
       return response.data.result;
     } catch (error) {
       console.error("HAY EL SIGUIENTE ERROR: " + error);
+      throw error;
     }
   }
 

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { pool } from '../middleware/db';
+import { RowDataPacket } from 'mysql2';
 
 declare module 'express-session' {
     interface Session {
@@ -20,7 +21,7 @@ export async function dataPlayerChart(
             return res.status(201).json({ result: rows });
            
         }else{
-            let query= `SELECT * FROM TODOS_DEPORTISTAS`;
+            let query= `SELECT * FROM todos_deportistas`;
 
 
             const [rows] = await pool.query(query);
@@ -50,7 +51,7 @@ export async function competitions(
             return res.status(201).json({ result: rows });
            
         }else{
-            let query= `SELECT  ID_COMPETICION,NOMBRE  FROM COMPETICIONES_TENIS`;
+            let query= `SELECT ID_COMPETICION,NOMBRE FROM competiciones_tenis`;
 
 
             const [rows] = await pool.query(query);
@@ -96,9 +97,9 @@ export async function playerCompetitions(
             }
             
             
-            const [rows] = await pool.query(query, [arrayReti, value1, value2]);
+            const [rows] = await pool.query<RowDataPacket[]>(query, [arrayReti, value1]);
 
-            return res.status(201).json({ result: rows });
+            return res.status(201).json({ result: rows.length ? rows : [{ id_deportista: Number(arrayReti), conteo: 0 }] });
     } catch (error) {
         console.error("Error en la consulta:", error);
         return res.status(500).json({ message: "Error en la consulta"+ error });

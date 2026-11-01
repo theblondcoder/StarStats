@@ -1,9 +1,7 @@
 
-import {Image,Input} from "@nextui-org/react";
-import imageExplanationCard from "../../../assets/images/explicacionCarta.png"
-import {useState, useRef, useEffect } from 'react'
+import {Input} from "@nextui-org/react";
+import {useState, useEffect } from 'react'
 import { RiSearchLine } from "react-icons/ri";
-import { usePopper } from 'react-popper';
 import PopUpInicio from "./Pop-up-inicio";
 import {searchBarPlayer, flagsCodes} from "../../../utils/inicio.calls"
 import {printKeyOfValue} from "../../../utils/utility.functions"
@@ -13,29 +11,17 @@ import {printKeyOfValue} from "../../../utils/utility.functions"
 
 function FirstPart(){
 
-    const [codigosPais, setCodPais]= useState("");
-    const [jugadores, setJugadores] = useState("");
-    const [jugFiltra, setJugFiltra]= useState("No hay jugadores disponibles.");
+    const [codigosPais, setCodPais]= useState({});
+    const [jugadores, setJugadores] = useState([]);
+    const [jugFiltra, setJugFiltra]= useState([]);
+    const [errorCarga, setErrorCarga] = useState('');
     const [isPopoverOpen, setPopoverOpen] = useState(false);
     const [inputValue, setInputValue] = useState('');
-    const inputRef = useRef(null);
-    const popperRef = useRef(null);
-  
-    const { styles, attributes } = usePopper(inputRef.current, popperRef.current, {
-      placement: 'bottom-start',
-      modifiers: [
-        { name: 'offset', options: { offset: [0, 10] } },
-        {name: 'arrow', options: {padding: 5,} },
-      ],
-    });
   
     const handleInputChange = (event) => {
       const value = event.target.value;
       setInputValue(value);
       if (value.length > 0) {
-        if(popperRef.current==null){
-            popperRef.current = inputRef.current;
-        }
         setPopoverOpen(true);
         filtrar(event.target.value);
       } else {
@@ -70,6 +56,7 @@ function FirstPart(){
         setJugadores(data);
       } catch (error) {
         console.error("HAY EL SIGUIENTE ERROR: " + error);
+        setErrorCarga('No se pudieron cargar los jugadores. Comprueba que la API y la base de datos estén en marcha.');
       }
     }
 
@@ -77,36 +64,17 @@ function FirstPart(){
 const fetchFlagsCodes = async () => {
   try {
     const data = await flagsCodes();
-    setCodPais(data);
-    sessionStorage.setItem('codigoPaises', JSON.stringify(data)); 
+    if (data) {
+      setCodPais(data);
+      sessionStorage.setItem('codigoPaises', JSON.stringify(data));
+    }
   } catch (error) {
     console.error("HAY EL SIGUIENTE ERROR: " + error);
   }
 }
 
 
-function asignarCodPais(){
-  if(jugadores.length>0){
-  let order_country_codes=[];
-  for (let i = 0; i < jugadores.length; i++) {
-    for (const key in jugadores[i]) {
-      if(key==="PAIS"){
-        let countryCode= printKeyOfValue(codigosPais, jugadores[i][key])
-        order_country_codes.push(countryCode)
-      }
-    }
-  }
-  setCodPais(order_country_codes)
-}
-
-}
-
-
-
-    
-useEffect(()=>{
-  asignarCodPais();
-}, [jugadores])
+const codigosAsignados = jugadores.map(jugador => printKeyOfValue(codigosPais, jugador.PAIS));
 
 
     
@@ -118,21 +86,25 @@ useEffect(() => {
  
 
     return(
-        <>
-            <div className="flex justify-center">
-                <div className="flex flex-wrap gap-4">
-                    <div>
+        <section className="home-hero" aria-labelledby="hero-title">
+            <div className="hero-copy">
+                <p className="eyebrow">OTRA FORMA DE MIRAR EL TENIS</p>
+                <h1 id="hero-title">El tenis,<br /><span>más allá del marcador.</span></h1>
+                <p className="hero-description">Las trayectorias se construyen punto a punto. Explora a tus jugadores favoritos y descubre cómo se comparan sus resultados.</p>
+                <div className="hero-actions">
+                    <a href="/comparar-jugador" className="button button-primary">Comparar jugadores <span aria-hidden="true">↗</span></a>
+                    <a href="/titulos-jugador" className="text-link">Ver jugadores <span aria-hidden="true">→</span></a>
+                </div>
+                <div className="hero-search">
+                    <label htmlFor="player-search" className="search-label">¿A quién quieres conocer?</label>
                     <Input
-                        ref={inputRef}
+                        id="player-search"
                         classNames={{
-                        base: "h-8",
-                        mainWrapper: "h-full",
-                        input: "text-small",
-                        inputWrapper: "h-full font-normal text-default-500 bg-default-100/20 dark:bg-default-500/20",
+                            input: "hero-search-input",
+                            inputWrapper: "hero-search-control",
                         }}
-                        className="w-search-bar-navbar"
                         placeholder="Buscar Jugador"
-                        size="sm"
+                        size="lg"
                         startContent={<RiSearchLine size={18} />}
                         type="search"
                         value={inputValue}
@@ -140,26 +112,25 @@ useEffect(() => {
                         onBlur={handleBlur}
                         onFocus={() => inputValue && setPopoverOpen(true)}
                     />
-                    </div>
-                    
                     {isPopoverOpen && (
-                        <div ref={popperRef} style={{...styles.popper, zIndex: 999}} {...attributes.popper}>
-                            <PopUpInicio jugadoresDispo={jugFiltra} codigPaisAsig={codigosPais}></PopUpInicio>
+                        <div className="search-suggestions">
+                            <PopUpInicio jugadoresDispo={jugFiltra} codigPaisAsig={codigosAsignados}></PopUpInicio>
                         </div>
                     )}
                 </div>
+                {errorCarga && <p role="alert" className="search-error">{errorCarga}</p>}
             </div>
-            <p className="titlesMainPage text-green-star-stats pt-8">¡Mira los datos de tu deportista favorito!</p>
-            <div className="flex justify-center">
-                <Image
-                    isZoomed
-                    alt="NextUI Fruit Image with Zoom"
-                    src={imageExplanationCard}
-                    className="w-explanationCard h-explanationCard z-0 "
-                    
-                />
+            <div className="hero-visual">
+                <div className="court-mark" aria-hidden="true" />
+                <a href="/titulos-jugador/1" className="player-preview" aria-label="Ver la ficha de Carlos Alcaraz">
+                    <div className="preview-top"><span>FICHA DE JUGADOR</span><span>↗</span></div>
+                    <img src="/images/1.png" alt="Carlos Alcaraz" width="234" height="190" />
+                    <h2>Carlos<br />Alcaraz</h2>
+                    <div className="preview-meta"><span>España · Tenis</span><span>Ver trayectoria →</span></div>
+                </a>
+                <p className="hero-caption"><span aria-hidden="true">✳</span> Cada jugador tiene una historia.</p>
             </div>
-        </>
+        </section>
     )
 }
 

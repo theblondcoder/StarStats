@@ -9,7 +9,7 @@ import {getCompetitions, getDataUserChart, getCompeRetir, getCompetiActi} from "
 
 function SearchComparerBar({setdatosJugador, setdatComJugador}) {
     const [seleccPlayer, setSeleccPlayer]= useState([]);
-    const [values, setValues] = React.useState(new Set(["1"]));
+    const [values, setValues] = React.useState(new Set([]));
     const [searchValue, setSearchValue] = useState('');
     const [value1, setValue1] = useState(new Set([]));
     const [value2, setValue2] = useState(new Set([]));
@@ -17,6 +17,8 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
     const [touched2, setTouched2] = useState(false);
     const [userData, setUserData] = useState([]);
     const [competitions, setCompetitions]= useState([]);
+    const [comparando, setComparando] = useState(false);
+    const [errorCarga, setErrorCarga] = useState('');
 
 
     const modalidades = [
@@ -33,6 +35,7 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
           setUserData(data);
         } catch (error) {
           console.error("HAY EL SIGUIENTE ERROR: " + error);
+          setErrorCarga('No se pudieron cargar los jugadores. Comprueba la API y la base de datos.');
         }
       }
 
@@ -42,6 +45,7 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
           setCompetitions(data);
         } catch (error) {
           console.error("HAY EL SIGUIENTE ERROR: " + error);
+          setErrorCarga('No se pudieron cargar las competiciones. Comprueba la API y la base de datos.');
         }
       }
 
@@ -51,6 +55,7 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
           return data
         } catch (error) {
           console.error("HAY EL SIGUIENTE ERROR: " + error);
+          throw error;
         }
       }
       
@@ -60,6 +65,7 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
                 return data
             }catch (error) {
             console.error("HAY EL SIGUIENTE ERROR: " + error);
+            throw error;
             }
         }
 
@@ -69,10 +75,14 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
         
     }, []);
 
+    useEffect(() => {
+        setSeleccPlayer(userData.filter(user => values.has(String(user.id_deportista))));
+    }, [values, userData]);
+
     function asignarColores(arrayUnido){
         let jugData= [...seleccPlayer];
         let comData= [...arrayUnido];
-        let colores=["#949694", "#2c29b2","#b72426", "#9dc201", "#0d1628" ];
+        let colores=["#d1e858", "#79cab1", "#eea36a", "#88b4e7", "#c6a2df" ];
         let validacionCol=[true, true, true, true, true];
         
         for (const key in jugData) {
@@ -101,6 +111,11 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
 
     
     function generarComparacion() {
+        if (!isValid1 || !isValid2 || !seleccPlayer.length || seleccPlayer.length > 5) return;
+        setErrorCarga('');
+        setComparando(true);
+        setdatosJugador([]);
+        setdatComJugador([]);
         let arrayReti = [];
         let arrayActi = [];
         let id_compe;
@@ -123,6 +138,7 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
                     })
                     .catch(error => {
                         console.error("Hubo un error:", error);
+                        throw error;
                     });
                 promesas.push(promesa);
             } else {
@@ -132,6 +148,7 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
                     })
                     .catch(error => {
                         console.error("Hubo un error:", error);
+                        throw error;
                     });
                 promesas.push(promesa);
             }
@@ -141,7 +158,10 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
             const segundaDimension = arrayReti.map(elemento => elemento[0]); 
             const arrayUnido = [...arrayActi, ...segundaDimension];
             asignarColores(arrayUnido);
-        }); 
+        }).catch(error => {
+            console.error(error);
+            setErrorCarga('No se pudo completar la comparación. Revisa los servicios e inténtalo de nuevo.');
+        }).finally(() => setComparando(false));
         //ESTO ES MUY IMPORTANTE YA QUE SIRVE PARA ESPERAR A QUE SE ACABEN TODAS LAS PROMESAS PARA REALIZAR LA UNION DE ARRAYS
     }
     
@@ -149,7 +169,7 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
     const renderUserListItem = (user) => (
         <ListboxItem key={user.id_deportista} textValue={user.nombre_depor}>
             <div className="flex gap-2 items-center">
-                <Avatar alt={user.nombre_depor} className="flex-shrink-0" size="sm" src={`../../../../public/images/${user.foto_perfil}`} />
+                <Avatar alt={user.nombre_depor} className="flex-shrink-0" size="sm" src={`/images/${user.foto_perfil}`} />
                 <div className="flex flex-col">
                     <span className="text-small text-white">{user.nombre_depor} {user.apellidos_depor}</span>
                     <span className="text-tiny text-default-400">{user.deporte}</span>
@@ -160,22 +180,10 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
     );
 
     const topContent = React.useMemo(() => {
-        const valuesArray = [...values]; // Convertir Set a Array
-        const dataPlayer = [...userData];
-        if (valuesArray.length === 0) {
+        const playerMerged = seleccPlayer;
+        if (playerMerged.length === 0) {
             return null;
         }
-
-        
-        const playerMerged = valuesArray.map(item1 => {
-            const item2 = dataPlayer.find(item2 => item2.id_deportista== item1);
-            return { ...item2, ...item1 };
-        });
-        if(playerMerged.length===0){
-            return null;
-        }else{
-            setSeleccPlayer(playerMerged);
-        } 
 
         return (
             <ScrollShadow
@@ -186,12 +194,12 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
                 
                 {playerMerged.map((value) => (
                     value.nombre_depor !== undefined && value.apellidos_depor !== undefined ? (
-                        <Chip key={value}>{`${value.nombre_depor} ${value.apellidos_depor}`}</Chip>
+                        <Chip key={value.id_deportista}>{`${value.nombre_depor} ${value.apellidos_depor}`}</Chip>
                     ) : null
                 ))}
             </ScrollShadow>
         );
-    }, [values]); // values, no valuesArray
+    }, [seleccPlayer]);
 
     const filteredUsers = userData.filter(user =>
         user.nombre_depor.toLowerCase().startsWith(searchValue.toLowerCase()) || 
@@ -199,11 +207,11 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
     );
 
     return (
-        <div className="max-h-[282px] max-w-[1000px] flex flex-col gap-3">
-        <div className="flex flex-row gap-6">
+        <div className="comparison-form">
+        <div className="comparison-controls">
             <div>
                 <Input
-                    label="Search"
+                    label="Buscar jugador"
                     isClearable
                     radius="lg"
                     value={searchValue}
@@ -230,7 +238,7 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
                             "!cursor-text",
                         ],
                     }}
-                    placeholder="Type to search..."
+                    placeholder="Nombre o apellido"
                     startContent={<RiSearchLine size={18} />}
                 />
             </div>
@@ -243,7 +251,7 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
                     errorMessage={ isValid1 || !touched1 ? "" : "Debes elegir una competicion"}
                     isInvalid={isValid1 || !touched1 ? false : true}
                     selectedKeys={value1}
-                    className="min-w-10 text-white"
+                    className="w-full text-white"
                     onSelectionChange={setValue1}
                     onClose={() => setTouched1(true)}
                 >
@@ -263,7 +271,7 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
                     errorMessage={ isValid2 || !touched2 ? "" : "Debes elegir una competicion"}
                     isInvalid={ isValid2 || !touched2 ? false : true}
                     selectedKeys={value2}
-                    className="max-w-xs text-white"
+                    className="w-full text-white"
                     onSelectionChange={setValue2}
                     onClose={() => setTouched2(true)}
                 >
@@ -275,14 +283,16 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
                 </Select>
             </div>
             <div>
-                <Button color="secondary" variant="shadow" size="lg" onClick={generarComparacion}>
+                <Button color="secondary" variant="shadow" size="lg" onClick={generarComparacion}
+                    className="compare-button"
+                    isLoading={comparando} isDisabled={!isValid1 || !isValid2 || !seleccPlayer.length || seleccPlayer.length > 5}>
                     Iniciar Comparación
                 </Button>
             </div>
         </div>
 
         <div>
-            <div  className="w-full max-w-full border-small bg-gray-600 bg-opacity-70  px-1 py-2 rounded-small border-default-200 dark:border-default-100">
+            <div className="comparison-player-list">
             <Listbox
                 color="secondary"
                 topContent={topContent}
@@ -292,8 +302,9 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
                 }}
         
                 items={filteredUsers.length ? filteredUsers : userData}
-                label="Assigned to"
+                aria-label="Jugadores para comparar"
                 selectionMode="multiple"
+                selectedKeys={values}
                 onSelectionChange={setValues} // Cambiar setValues a setArrayValues
                 variant="flat"
             >
@@ -301,6 +312,8 @@ function SearchComparerBar({setdatosJugador, setdatComJugador}) {
             </Listbox>
             </div>
         </div>
+        {seleccPlayer.length > 5 && <p role="alert" className="text-yellow-400">Selecciona un máximo de 5 jugadores.</p>}
+        {errorCarga && <p role="alert" className="text-red-400">{errorCarga}</p>}
     </div>
 );
 }

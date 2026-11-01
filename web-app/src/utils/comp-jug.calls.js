@@ -1,6 +1,6 @@
 import Axios from 'axios';
-const api_url = import.meta.env.REACT_APP_API_URL;
-const scraping_url= import.meta.env.REACT_APP_SCRAPING_URL;
+const api_url = import.meta.env.REACT_APP_API_URL || '/API-StarStats';
+const scraping_url= import.meta.env.REACT_APP_SCRAPING_URL || '/StarStats-SCRAPING';
 
 Axios.defaults.withCredentials = true;
 
@@ -11,6 +11,7 @@ export async function getDataUserChart(){
       return response.data.result;
     } catch (error) {
       console.error("HAY EL SIGUIENTE ERROR: " + error);
+      throw error;
     }
   }
 
@@ -21,6 +22,7 @@ export async function getDataUserChart(){
       return response.data.result;
     } catch (error) {
       console.error("HAY EL SIGUIENTE ERROR: " + error);
+      throw error;
     }
   }
 
@@ -35,6 +37,7 @@ export async function getDataUserChart(){
       return response.data.result;
     } catch (error) {
       console.error("HAY EL SIGUIENTE ERROR: " + error);
+      throw error;
     }
   }
   export function getCompetiActi(jugador, compe, moda){
@@ -50,5 +53,6 @@ export async function getDataUserChart(){
     })
     .catch(error => {
       console.error(error);
+      throw error;
     });
 }

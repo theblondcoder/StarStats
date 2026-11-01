@@ -1,6 +1,6 @@
 import Axios from 'axios';
-const api_url = import.meta.env.REACT_APP_API_URL;
-const scraping_url= import.meta.env.REACT_APP_SCRAPING_URL;
+const api_url = import.meta.env.REACT_APP_API_URL || '/API-StarStats';
+const scraping_url= import.meta.env.REACT_APP_SCRAPING_URL || '/StarStats-SCRAPING';
 
 
 export async function getDatosTodDepor(id){
@@ -9,6 +9,7 @@ export async function getDatosTodDepor(id){
       return response.data.result;
     } catch (error) {
       console.error("HAY EL SIGUIENTE ERROR: " + error);
+      throw error;
     }
   }
 
@@ -19,6 +20,7 @@ export async function getDatosTodDepor(id){
       return response.data.result;
     } catch (error) {
       console.error("HAY EL SIGUIENTE ERROR: " + error);
+      throw error;
     }
   }
 
@@ -29,6 +31,7 @@ export async function getDatosTodDepor(id){
       return response.data.result;
     } catch (error) {
       console.error("HAY EL SIGUIENTE ERROR: " + error);
+      throw error;
     }
   }
 
@@ -43,5 +46,6 @@ export function getDatosCartaWeb(jugador){
     })
     .catch(error => {
       console.error(error);
+      throw error;
     });
 }

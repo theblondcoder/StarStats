@@ -13,13 +13,15 @@ function ContenedorCartas({jugSelec}){
     const [playersActives, setPlayersActives]= useState([]);
     const [aux, setAux]= useState([]);
     const[resultado, setResultado]= useState([]);
+    const [cargando, setCargando] = useState(true);
+    const [errorCarga, setErrorCarga] = useState('');
 
     useEffect(() => { 
         fetchAllPlayers(id);
     }, []);
 
     useEffect(() => { 
-        procesarJugReti();
+        if (controlEjecucion) procesarJugReti();
     }, [controlEjecucion]);
 
     useEffect(() => { 
@@ -46,8 +48,16 @@ function ContenedorCartas({jugSelec}){
             try {
             const data = await getDatosTodDepor(id);
             temp = data;
+            if (!temp.length) {
+                setErrorCarga('No se encontró el jugador solicitado.');
+                setCargando(false);
+                return;
+            }
             } catch (error) {
                 console.error("HAY EL SIGUIENTE ERROR: " + error);
+                setErrorCarga('No se pudieron cargar los jugadores. Comprueba la API y la base de datos.');
+                setCargando(false);
+                return;
             }
             for (const player of temp) {
                 if (player.ANIO_RETIRO === null) {
@@ -75,16 +85,19 @@ function ContenedorCartas({jugSelec}){
                 for (const value of Object.values(temp2)) {
                     try {
                         const data = await getDatosCartaWeb(value);
-                        if(data!=""){
+                        if(data && typeof data === 'object'){
                             control.push(data);
                         }
                         } catch (error) {
                             console.error("HAY EL SIGUIENTE ERROR: " + error);
+                            setErrorCarga('No se pudieron obtener algunos datos de Wikipedia. Se muestran los datos disponibles.');
                         }
                         
                 }
                 if(control.length>0){
                     setManejoDatos(control);
+                } else {
+                    procesarJugReti();
                 }
                 
             }else if(arrayPlayers.length>0){
@@ -97,19 +110,15 @@ function ContenedorCartas({jugSelec}){
             let temp3 = manejoDatos;
             if (temp3 !== undefined) {
                 const nuevosDatos = temp3.map(value => {
-                    let edad = value.FECHA_NACIMIENTO.match(/\(([^)]+)\)/)[1];
-                    edad = edad.match(/\d+/g).join('');
-                    let index = value.FECHA_NACIMIENTO.indexOf('(');
-                    let cleanDate = value.FECHA_NACIMIENTO.substring(0, index);
-                    let titulos = value.TITULOS.match(/\d+/g);
-                    let sumaTitulos = titulos.reduce((a, b) => parseInt(a) + parseInt(b), 0);
+                    const cleanDate = (value.FECHA_NACIMIENTO || '').split('(')[0].trim();
+                    const titulos = (value.TITULOS || '').match(/\d+/g) || [];
+                    const sumaTitulos = titulos.reduce((a, b) => a + Number(b), 0);
         
                     return {
                         ...value,
-                        EDAD: parseInt(edad, 10),
                         FECHA_NACIMIENTO: cleanDate,
-                        EXTREMIDAD_DOMINANTE: value.EXTREMIDAD_DOMINANTE.split(';')[0].trim(),
-                        TITULOS: sumaTitulos.toString(),
+                        EXTREMIDAD_DOMINANTE: (value.EXTREMIDAD_DOMINANTE || '').split(';')[0].trim(),
+                        TITULOS: titulos.length ? sumaTitulos.toString() : null,
                     };
                 });
                 let comodin= arrayPlayers;
@@ -144,6 +153,8 @@ function ContenedorCartas({jugSelec}){
                 });
                 }catch (error) {
                     console.error("HAY EL SIGUIENTE ERROR: " + error);
+                    arrayMerged = temp4;
+                    setErrorCarga('No se pudieron cargar todos los datos de la base de datos.');
                 }
                 
                 try {
@@ -154,6 +165,8 @@ function ContenedorCartas({jugSelec}){
                 });
                 } catch (error) {
                     console.error("HAY EL SIGUIENTE ERROR: " + error);
+                    temp4 = arrayMerged;
+                    setErrorCarga('No se pudieron cargar todos los títulos de la base de datos.');
                 }
 
                 const fusionarArrays = (arr1, arr2) => {
@@ -174,23 +187,29 @@ function ContenedorCartas({jugSelec}){
             }else{
                 setResultado("¡Ha habido un error con la carga de jugadores, por favor vuelva a intentarlo o contacte con el servicio técnico!");
             }
+            setCargando(false);
 
             }
 
 
     return(
-        <div className="flex justify-center items-center min-h-screen  mx-auto mt-5">
+        <main className="page-shell players-section">
+        <div className="page-heading">
+            <p className="eyebrow">DENTRO Y FUERA DE LA PISTA</p>
+            <h1 className="page-title">La historia de cada jugador.</h1>
+            <p className="page-intro">Descubre sus orígenes, su trayectoria y los títulos registrados en su ficha.</p>
+        </div>
         <Card
-        isBlurred
-        className="border-none  max-w-[57rem] min-w-[51rem]  bg-gray-star-stats  py-5"
+        className="players-panel"
         shadow="sm"
       
         >
             
-            <CardBody>
-                <div className="flex flex-row flex-wrap gap-7 md:gap-6 items-center justify-center p-4">
+            <CardBody className="players-panel-body">
+                {errorCarga && <p role="alert" className="text-yellow-400 text-center">{errorCarga}</p>}
+                <div className="player-grid">
                 {
-                    Array.isArray(jugDispo) && jugDispo.length > 0 ? (
+                    cargando ? <p>Cargando jugadores…</p> : Array.isArray(jugDispo) && jugDispo.length > 0 ? (
                         jugDispo.map((jugador, index) => (
                             <CardModel key={index} jugador={jugador} />
                         ))
@@ -201,7 +220,7 @@ function ContenedorCartas({jugSelec}){
                 </div>
             </CardBody>
         </Card>
-        </div>
+        </main>
 
     )
 }

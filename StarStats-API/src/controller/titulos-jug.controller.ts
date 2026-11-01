@@ -41,7 +41,7 @@ export async function depor_retirados(
         let query = `
             SELECT ID_DEPORTISTA, CIUDAD, FECHA_NACIMIENTO, 
             TIMESTAMPDIFF(YEAR, FECHA_NACIMIENTO, CURDATE()) AS EDAD, EXTREMIDAD_DOMINANTE  
-            FROM DEPORTISTAS_RETIRADOS
+            FROM deportistas_retirados
         `;
         let queryParams: any[] = [];
 

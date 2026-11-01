@@ -5,7 +5,7 @@
   <p>A full-stack platform built with React, Express, TypeScript, PHP, and MySQL.</p>
   <p>
     <img alt="React 18" src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=20232A" />
-    <img alt="Vite 5" src="https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
+    <img alt="Vite 6" src="https://img.shields.io/badge/Vite-6-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
     <img alt="TypeScript 5" src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
     <img alt="Express 4" src="https://img.shields.io/badge/Express-4-000000?style=for-the-badge&logo=express&logoColor=white" />
     <img alt="MySQL and MariaDB" src="https://img.shields.io/badge/MySQL-MariaDB-4479A1?style=for-the-badge&logo=mysql&logoColor=white" />
@@ -64,10 +64,46 @@ The app reads each player's retirement status from the database through the Expr
 
 ### Prerequisites
 
-- Node.js 20 or newer
+- Node.js 22.14 or newer (Node.js 24 LTS recommended; see `.nvmrc`)
 - npm
 - MySQL or MariaDB
-- PHP 8 or newer with DOM support enabled
+- PHP 8 or newer with DOM and OpenSSL enabled, available as `php` on your PATH
+
+### Quick local start
+
+From the repository root:
+
+```bash
+npm run setup
+```
+
+This installs both applications and creates missing `.env` files without overwriting existing configuration. Start your MySQL/MariaDB server, then edit `StarStats-API/.env` with its host, port, user and password.
+
+```bash
+npm run db:init
+npm run dev
+```
+
+Open **http://localhost:5173**. The last command starts the existing Express API, Vite frontend and PHP server together. **Ctrl+C** stops those three processes; the database server is managed separately. The database initializer only imports the demo schema into an empty database and does not overwrite existing tables.
+
+The default ports are **5173** (web), **5900** (API) and **8000** (PHP). Vite proxies `/API-StarStats` and `/StarStats-SCRAPING`, so no Apache installation or custom browser CORS setup is needed. If you change the API/PHP ports, also update the targets in `web-app/vite.config.js` and the PHP command in `scripts/dev.mjs`.
+
+On Windows, if PHP is not on your PATH, set its executable before starting:
+
+You can also save its path in the optional `PHP_BINARY` entry in `StarStats-API/.env`.
+
+```powershell
+$env:PHP_BINARY = 'C:\path\to\php.exe'
+npm run dev
+```
+
+To check the API build, frontend lint and production build:
+
+```bash
+npm run check
+```
+
+See [repair and interview notes](docs/LOCAL-REPAIR.md) for what changed and what the original demo does not implement. The manual startup steps below remain available if you prefer separate terminals.
 
 ### 1. Clone the repository
 
@@ -114,10 +150,16 @@ The web app runs on `http://localhost:5173` by default.
 Expose `ficheros Scraping/StarStats-SCRAPING` through a local PHP server or an Apache/PHP setup so the frontend can reach:
 
 ```text
-http://localhost/StarStats-SCRAPING
+http://127.0.0.1:8000
 ```
 
-Update `REACT_APP_SCRAPING_URL` in `web-app/.env` if you serve it from a different URL.
+For the built-in PHP server, run this from the repository root:
+
+```bash
+php -S 127.0.0.1:8000 -t "ficheros Scraping/StarStats-SCRAPING"
+```
+
+Keep `REACT_APP_SCRAPING_URL=/StarStats-SCRAPING` to use Vite's proxy. For a separate deployment, configure the public API/scraping URLs and matching `CLIENT_ORIGIN` instead.
 
 ## Environment Variables
 
@@ -127,7 +169,7 @@ Update `REACT_APP_SCRAPING_URL` in `web-app/.env` if you serve it from a differe
 | --- | --- | --- |
 | `PORT` | API server port | `5900` |
 | `CLIENT_ORIGIN` | Allowed frontend origin for CORS | `http://localhost:5173` |
-| `DB_HOST` | Database host | `localhost` |
+| `DB_HOST` | Database host | `127.0.0.1` |
 | `DB_PORT` | Database port | `3306` |
 | `DB_USER` | Database user | `root` |
 | `DB_PASSWORD` | Database password | empty |
@@ -139,8 +181,8 @@ Update `REACT_APP_SCRAPING_URL` in `web-app/.env` if you serve it from a differe
 
 | Variable | Description | Default |
 | --- | --- | --- |
-| `REACT_APP_API_URL` | Base URL for the Express API routes | `http://localhost:5900/API-StarStats` |
-| `REACT_APP_SCRAPING_URL` | Base URL for the PHP scraping endpoints | `http://localhost/StarStats-SCRAPING` |
+| `REACT_APP_API_URL` | Express API routes, through the local Vite proxy | `/API-StarStats` |
+| `REACT_APP_SCRAPING_URL` | PHP endpoints, through the local Vite proxy | `/StarStats-SCRAPING` |
 
 ## Project Structure
 
